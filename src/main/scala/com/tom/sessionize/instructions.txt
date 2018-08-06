@@ -1,0 +1,39 @@
+Task: Design and implement (in Scala, Java, C++ or other major language) a data processing program that receives device state snapshot events on standard input and produces "sessionized" state on standard output.
+
+Input consists of one state snapshot event per line, containing 3 columns: DeviceId, Timestamp and Activity (OS-dependent delimiter).  On each row, values are separated by 1+ blank space (tab or space).  Each row describes the state of the particular device in terms of engagement with a
+given activity at a particular time.   For instance the first data row below indicates that device D1 was performing activity A1 at timestamp 1.  The input consists of header line followed by the actual data as seen below.
+
+DeviceId    Timestamp   Activity
+D1          1           A1
+D2          2           A1
+D3          1           A2
+D1          3           A2
+D4          2           A3
+D1          2           A2
+D3          2           A2
+D2          3           A3
+
+The goal is to produce "sessionized" version of the input event stream, which is represented by 4 columns:  DeviceId, From, To, Activity.  Each row describes a contiguous and consecutive activity the particular device was involved in between the two timestamps in From/To columns respectively.
+Explicit design goal is to de-duplicate identical state snapshots and only emit the edge events: begin/end.   Particular activity ends if any of those is true: (a) another activity begins on the device, (b) the input ends or (c) a timeout of 3 seconds expires (staring at the last event received
+from the device).  Zero-length sessions (those with identical From and To) should not be emitted on the output.
+
+One possible output that corresponds to the above input:
+
+DeviceId    From    To  Activity
+D1          1       2   A1
+D1          2       3   A2
+D2          2       3   A1
+D3          1       2   A2
+
+Also, consider "out of bound" events. For example,
+D1          5           A1
+D1          9999        A5
+D1          12          A3
+D1          1           A4
+
+(D1 9999 A1) should not affect the sessionization state.
+
+Deliverables:
+
+1. Compilable source code with instructions how to compile and test
+2. Design document describing at least a theory of operation.
